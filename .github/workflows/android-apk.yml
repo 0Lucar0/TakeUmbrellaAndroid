@@ -66,7 +66,8 @@ jobs:
           EOF
           chmod +x "$SDK_ROOT/tools/bin/sdkmanager"
 
-          yes | sdkmanager --licenses
+          # sdkmanager may close stdin early; ignore "Broken pipe" from `yes` under pipefail
+          yes | sdkmanager --licenses || true
           sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
 
       - name: Build debug APK
