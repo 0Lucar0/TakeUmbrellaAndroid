@@ -18,6 +18,7 @@ android.api = 34
 android.minapi = 24
 android.ndk_api = 24
 android.sdk_build_tools = 34.0.0
+android.sdk_path = /usr/local/lib/android/sdk
 
 android.services = umbrella_service:service/main.py
 
