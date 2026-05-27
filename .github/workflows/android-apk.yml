@@ -44,6 +44,28 @@ jobs:
 
       - name: Install required Android SDK packages
         run: |
+          set -euo pipefail
+          SDK_ROOT="${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}"
+
+          # Ensure modern cmdline-tools sdkmanager exists (older tools/bin sdkmanager breaks on Java 9+ due to JAXB).
+          if [ ! -x "$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" ]; then
+            mkdir -p "$SDK_ROOT/cmdline-tools"
+            cd "$RUNNER_TEMP"
+            curl -fsSL -o cmdline-tools.zip "https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip"
+            unzip -q cmdline-tools.zip -d "$SDK_ROOT/cmdline-tools"
+            mv "$SDK_ROOT/cmdline-tools/cmdline-tools" "$SDK_ROOT/cmdline-tools/latest"
+          fi
+
+          export PATH="$SDK_ROOT/cmdline-tools/latest/bin:$SDK_ROOT/platform-tools:$PATH"
+
+          # If legacy sdkmanager exists, replace it with a shim to the modern one (p4a may call tools/bin/sdkmanager).
+          mkdir -p "$SDK_ROOT/tools/bin"
+          cat > "$SDK_ROOT/tools/bin/sdkmanager" <<'EOF'
+          #!/usr/bin/env bash
+          exec "${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}/cmdline-tools/latest/bin/sdkmanager" "$@"
+          EOF
+          chmod +x "$SDK_ROOT/tools/bin/sdkmanager"
+
           yes | sdkmanager --licenses
           sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
 
