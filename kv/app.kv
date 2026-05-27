@@ -1,0 +1,265 @@
+#:kivy 2.2.0
+
+<BaseLabel@Label>:
+    color: app.colors["text"]
+    font_size: "16sp"
+
+<MutedLabel@Label>:
+    color: app.colors["muted"]
+    font_size: "14sp"
+
+<EmojiLabel@Label>:
+    font_name: app.emoji_font if app.emoji_font else self.font_name
+
+<AppTextInput@TextInput>:
+    multiline: False
+    padding: "12dp", "12dp"
+    cursor_color: app.colors["accent"]
+    foreground_color: app.colors["text"]
+    hint_text_color: app.colors["muted"]
+    background_normal: ""
+    background_active: ""
+    background_color: app.colors["surface"]
+    selection_color: [app.colors["accent"][0], app.colors["accent"][1], app.colors["accent"][2], 0.35]
+    size_hint_y: None
+    height: "46dp"
+
+<OnboardingScreen>:
+    BoxLayout:
+        orientation: "vertical"
+        padding: "20dp"
+        spacing: "14dp"
+        canvas.before:
+            Color:
+                rgba: app.colors["bg"]
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+        BaseLabel:
+            text: app.t("onboarding_title")
+            font_size: "22sp"
+            bold: True
+            size_hint_y: None
+            height: self.texture_size[1] + dp(10)
+
+        MutedLabel:
+            text: app.t("onboarding_body")
+            text_size: self.width, None
+            size_hint_y: None
+            height: self.texture_size[1] + dp(10)
+
+        Widget:
+            size_hint_y: 1
+
+        Button:
+            text: app.t("allow_notifications")
+            background_normal: ""
+            background_color: app.colors["surface"]
+            color: app.colors["text"]
+            size_hint_y: None
+            height: "46dp"
+            on_release: root.request_perms()
+
+        Button:
+            text: app.t("allow_location")
+            background_normal: ""
+            background_color: app.colors["surface"]
+            color: app.colors["text"]
+            size_hint_y: None
+            height: "46dp"
+            on_release: root.request_perms()
+
+        Button:
+            text: app.t("continue")
+            background_normal: ""
+            background_color: app.colors["accent"]
+            color: (1,1,1,1)
+            size_hint_y: None
+            height: "50dp"
+            on_release: root.finish()
+
+<HomeScreen>:
+    BoxLayout:
+        orientation: "vertical"
+        padding: "18dp"
+        spacing: "14dp"
+        canvas.before:
+            Color:
+                rgba: app.colors["bg"]
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+        BoxLayout:
+            size_hint_y: None
+            height: "40dp"
+            spacing: "10dp"
+            BaseLabel:
+                text: root.city_label
+                halign: "left"
+                valign: "middle"
+                text_size: self.size
+            Button:
+                text: app.t("settings")
+                size_hint_x: None
+                width: "120dp"
+                background_normal: ""
+                background_color: app.colors["surface"]
+                color: app.colors["text"]
+                on_release: root.open_settings()
+
+        BoxLayout:
+            orientation: "vertical"
+            spacing: "8dp"
+            size_hint_y: None
+            height: "180dp"
+            canvas.before:
+                Color:
+                    rgba: app.colors["surface"]
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [18,]
+
+            EmojiLabel:
+                id: status_icon
+                text: "☔" if root.umbrella_needed else "☂"
+                font_size: "64sp"
+                color: app.colors["bad"] if root.umbrella_needed else app.colors["good"]
+                size_hint_y: None
+                height: "90dp"
+
+            BaseLabel:
+                text: app.t("today_need_umbrella") if root.umbrella_needed else app.t("today_no_umbrella")
+                font_size: "20sp"
+                bold: True
+                size_hint_y: None
+                height: "34dp"
+                halign: "center"
+                valign: "middle"
+                text_size: self.size
+
+            MutedLabel:
+                text: app.t("rain_chance", pct=int(root.rain_pct))
+                size_hint_y: None
+                height: "26dp"
+                halign: "center"
+                valign: "middle"
+                text_size: self.size
+
+        MutedLabel:
+            text: app.t("weather_desc", desc=root.weather_desc or "—")
+            size_hint_y: None
+            height: "22dp"
+
+        Widget:
+            size_hint_y: 1
+
+        Button:
+            text: "Обновить"
+            background_normal: ""
+            background_color: app.colors["surface"]
+            color: app.colors["text"]
+            size_hint_y: None
+            height: "46dp"
+            on_release: root.refresh()
+
+<SettingsScreen>:
+    BoxLayout:
+        orientation: "vertical"
+        padding: "18dp"
+        spacing: "12dp"
+        canvas.before:
+            Color:
+                rgba: app.colors["bg"]
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+        BoxLayout:
+            size_hint_y: None
+            height: "40dp"
+            spacing: "10dp"
+            BaseLabel:
+                text: app.t("settings")
+                font_size: "20sp"
+                bold: True
+                halign: "left"
+                valign: "middle"
+                text_size: self.size
+            Button:
+                text: "Назад"
+                size_hint_x: None
+                width: "90dp"
+                background_normal: ""
+                background_color: app.colors["surface"]
+                color: app.colors["text"]
+                on_release: root.back()
+
+        BoxLayout:
+            size_hint_y: None
+            height: "46dp"
+            spacing: "10dp"
+            BaseLabel:
+                text: app.t("notify_enabled")
+                halign: "left"
+                valign: "middle"
+                text_size: self.size
+            CheckBox:
+                active: root.notify_enabled
+                on_active: root.toggle_notify(self.active)
+
+        BoxLayout:
+            size_hint_y: None
+            height: "46dp"
+            spacing: "10dp"
+            BaseLabel:
+                text: app.t("notify_time") + f": {root.time_label}"
+                halign: "left"
+                valign: "middle"
+                text_size: self.size
+            AppTextInput:
+                hint_text: "07:00"
+                input_filter: lambda s, from_undo: ''.join([c for c in s if c.isdigit() or c == ':'])
+                text: root.time_label
+                on_text_validate: root.set_time(self.text)
+
+        BoxLayout:
+            size_hint_y: None
+            height: "46dp"
+            spacing: "10dp"
+            BaseLabel:
+                text: app.t("theme") + f": " + app.t("theme_" + root.theme)
+                halign: "left"
+                valign: "middle"
+                text_size: self.size
+            Button:
+                text: "Сменить"
+                size_hint_x: None
+                width: "120dp"
+                background_normal: ""
+                background_color: app.colors["surface"]
+                color: app.colors["text"]
+                on_release: root.cycle_theme()
+
+        BaseLabel:
+            text: app.t("change_city")
+            size_hint_y: None
+            height: "28dp"
+            bold: True
+
+        AppTextInput:
+            id: city_input
+            hint_text: app.t("search_city_hint")
+            on_text: root.search_city(self.text)
+
+        ScrollView:
+            bar_width: "6dp"
+            GridLayout:
+                id: results_box
+                cols: 1
+                size_hint_y: None
+                height: self.minimum_height
+                spacing: "6dp"
+
